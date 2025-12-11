@@ -126,16 +126,25 @@ clean() {
 }
 
 chid() {
-    [ -z "$1" ] && return
+    [ -z "$1" ] && return 0
     [[ ! $1 =~ ^[a-zA-Z][a-zA-Z0-9_]*$ ]] && error "Invalid App ID"
-    [ "$1" = "$appname" ] && return
+    [ "$1" = "$appname" ] && return 0
     
-    try find . -type f \( -name '*.gradle' -o -name '*.java' -o -name '*.xml' \) -exec sed -i "s/com\.\([a-zA-Z0-9_]*\)\.htpk/com.$1.htpk/g" {} +
+    # Only run sed if matching files exist
+    local files
+    files=$(find . -type f \( -name '*.gradle' -o -name '*.java' -o -name '*.xml' \) 2>/dev/null || true)
+    if [ -n "$files" ]; then
+        echo "$files" | xargs -d '\n' sed -i "s/com\.\([a-zA-Z0-9_]*\)\.htpk/com.$1.htpk/g" 2>/dev/null || true
+    fi
     
-    local current_dir=$(find app/src/main/java/com -maxdepth 1 -mindepth 1 -type d -not -name "$1" | head -n 1)
+    # Ensure the java directory structure exists
+    mkdir -p "app/src/main/java/com"
+    
+    local current_dir
+    current_dir=$(find app/src/main/java/com -maxdepth 1 -mindepth 1 -type d -not -name "$1" 2>/dev/null | head -n 1) || true
     if [ -n "$current_dir" ] && [ -d "$current_dir" ]; then
         if [ "$current_dir" != "app/src/main/java/com/$1" ]; then
-            try mv "$current_dir" "app/src/main/java/com/$1"
+            mv "$current_dir" "app/src/main/java/com/$1" 2>/dev/null || true
         fi
     fi
     appname=$1
@@ -143,21 +152,34 @@ chid() {
 
 rename() {
     local new_name="$*"
-    find app/src/main/res/values* -name "strings.xml" | while read xml_file; do
-        escaped_name=$(echo "$new_name" | sed 's/[\/&]/\\&/g')
-        try sed -i "s|<string name=\"app_name\">[^<]*</string>|<string name=\"app_name\">$escaped_name</string>|" "$xml_file"
-    done
+    # Safely find strings.xml files, if none found, do nothing
+    find app/src/main/res/values* -name "strings.xml" 2>/dev/null | while read -r xml_file; do
+        if [ -f "$xml_file" ]; then
+            escaped_name=$(echo "$new_name" | sed 's/[\/&]/\\&/g')
+            # Use temporary file for sed to avoid issues
+            sed "s|<string name=\"app_name\">[^<]*</string>|<string name=\"app_name\">$escaped_name</string>|" "$xml_file" > "${xml_file}.tmp" && mv "${xml_file}.tmp" "$xml_file"
+        fi
+    done || true
 }
 
 set_icon() {
     local icon_path="$@"
-    local dest_file="app/src/main/res/mipmap/ic_launcher.png"
-    [ -z "$icon_path" ] && return
+    local dest_dir="app/src/main/res/mipmap"
+    local dest_file="$dest_dir/ic_launcher.png"
+    [ -z "$icon_path" ] && return 0
+    
     if [ -n "${CONFIG_DIR:-}" ] && [[ "$icon_path" != /* ]]; then icon_path="$CONFIG_DIR/$icon_path"; fi
-    if [ -f "$icon_path" ]; then try cp "$icon_path" "$dest_file"; fi
+    
+    if [ -f "$icon_path" ]; then
+        mkdir -p "$dest_dir"
+        cp "$icon_path" "$dest_file" 2>/dev/null || true
+    fi
 }
 
-appname=$(grep -Po '(?<=applicationId "com\.)[^.]*' app/build.gradle || echo "unknown")
+appname="unknown"
+if [ -f app/build.gradle ]; then
+    appname=$(grep -Po '(?<=applicationId "com\.)[^.]*' app/build.gradle 2>/dev/null) || appname="unknown"
+fi
 
 if [ $# -eq 0 ]; then exit 1; fi
 eval $@
