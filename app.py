@@ -1,3 +1,13 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "litestar",
+#     "python-multipart",
+#     "sniffio",
+#     "uvicorn",
+# ]
+# ///
+
 import os
 import subprocess
 import sys
