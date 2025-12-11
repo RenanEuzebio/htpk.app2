@@ -184,7 +184,8 @@ def main():
         sys.exit(1)
 
     print("\n=== SETUP COMPLETE ===")
-    print("Environment ready. You can now run 'python app.py'")
+    print("Environment ready. You can now run 'uv run app.py'")
 
 if __name__ == "__main__":
     main()
+
