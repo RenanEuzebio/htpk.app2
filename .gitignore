@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+env/
+
+# Project-specific: Downloaded dependencies
+lib/
+# These are large downloads: JDK, Gradle, Android SDK
+# They should be downloaded via setup.py
+
+# Project-specific: Build outputs
+cache/
+output/
+*.apk
+*.aab
+
+# Project-specific: User uploads
+*.zip
+
+# Android build artifacts
+android_source/app/build/
+android_source/.gradle/
+android_source/local.properties
+*.iml
+.idea/
+.gradle/
+
+# Android template files that get modified during builds
+android_source/app/build.gradle
+android_source/app/src/main/java/com/*/
+android_source/app/src/main/res/mipmap/ic_launcher.png
+android_source/app/src/main/res/values*/strings.xml
+android_source/app/src/main/assets/
+
+# Keystores (IMPORTANT: Never commit these!)
+*.keystore
+*.jks
+key.properties
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# IDE/Editor files
+.vscode/
+*.swp
+*.swo
+*.swn
+.project
+.classpath
+.settings/
+
+# MCP config (optional - keep if you want to share MCP settings)
+.mcp.json
+
+# Claude Code (keep plans private)
+.claude/plans/
