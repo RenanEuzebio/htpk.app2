@@ -256,7 +256,15 @@ def overwrite_android_files(app_id: str, main_url: str) -> None:
 
     java_file = package_dir / "MainActivity.java"
     java_content = MAIN_ACTIVITY_TEMPLATE.replace("APP_ID_PLACEHOLDER", app_id).replace("MAIN_URL_PLACEHOLDER", main_url)
+    java_file = package_dir / "MainActivity.java"
+    java_content = MAIN_ACTIVITY_TEMPLATE.replace("APP_ID_PLACEHOLDER", app_id).replace("MAIN_URL_PLACEHOLDER", main_url)
     java_file.write_text(java_content, encoding="utf-8")
+
+    # 3. Ensure strings.xml exists
+    strings_path = ANDROID_DIR / "app/src/main/res/values/strings.xml"
+    strings_path.parent.mkdir(parents=True, exist_ok=True)
+    if not strings_path.exists():
+        strings_path.write_text('<resources>\n    <string name="app_name">My New App</string>\n</resources>', encoding="utf-8")
 
 def execute_build_async(build_id: str, data: dict) -> None:
     def update(progress, msg, status="in_progress", **kwargs):
@@ -321,6 +329,10 @@ def execute_build_async(build_id: str, data: dict) -> None:
 
         update(100, "Done!", "complete", apk_path=str(final_apk), apk_filename=f"{app_id}_release.apk")
 
+    except subprocess.CalledProcessError as e:
+        error_msg = f"Command failed: {e.cmd}\nOutput:\n{e.stdout.decode('utf-8', errors='replace')}"
+        print(f"Build Error: {error_msg}")
+        update(0, "Build failed. Check console for details.", "error", error=error_msg)
     except Exception as e:
         print(f"Build Error: {e}")
         update(0, f"Error: {str(e)}", "error", error=str(e))
