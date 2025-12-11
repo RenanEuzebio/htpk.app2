@@ -75,3 +75,8 @@ Thumbs.db
 
 # Claude Code (keep plans private)
 .claude/plans/
+# UV / Python project files
+main.py
+uv.lock
+pyproject.toml
+.python-version

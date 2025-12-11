@@ -56,8 +56,11 @@ apk() {
     
     info "Building APK..."
     
+    # Create local.properties to ensure Gradle finds the SDK
+    echo "sdk.dir=$ANDROID_HOME" > local.properties
+    
     # Build using local Gradle and cache
-    try gradle assembleRelease --quiet --project-cache-dir "$CACHE_ROOT/.gradle"
+    try gradle assembleRelease --project-cache-dir "$CACHE_ROOT/.gradle"
     
     if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
         log "APK Built Successfully!"
