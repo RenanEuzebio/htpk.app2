@@ -3,605 +3,319 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>HTPK // Builder</title>
+        <title>HTPK Builder</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <link
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            rel="stylesheet"
-        />
-
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
-        />
-
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ["Inter", "sans-serif"],
-                            mono: ["JetBrains Mono", "monospace"],
-                        },
-                        colors: {
-                            "tech-bg": "#0B0F15",
-                            "tech-surface": "#151A23",
-                            "tech-surface-lighter": "#1F2937",
-                            "tech-border": "#2D3748",
-                            "tech-accent": "#3B82F6",
-                            "tech-accent-hover": "#2563EB",
-                            "tech-text": "#E2E8F0",
-                            "tech-text-muted": "#94A3B8",
-                        },
-                        boxShadow: {
-                            glow: "0 0 20px -5px rgba(59, 130, 246, 0.3)",
-                            "inner-light":
-                                "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
-                        },
-                        animation: {
-                            "slide-up": "slideUp 0.5s ease-out forwards",
-                        },
-                        keyframes: {
-                            slideUp: {
-                                "0%": {
-                                    opacity: "0",
-                                    transform: "translateY(15px)",
-                                },
-                                "100%": {
-                                    opacity: "1",
-                                    transform: "translateY(0)",
-                                },
-                            },
-                        },
-                    },
-                },
-            };
-        </script>
-        <style>
-            body {
-                background-color: #0b0f15;
-                background-image:
-                    radial-gradient(
-                        circle at 50% 0%,
-                        #1e293b 0%,
-                        transparent 50%
-                    ),
-                    radial-gradient(
-                        circle at 80% 80%,
-                        rgba(59, 130, 246, 0.05) 0%,
-                        transparent 30%
-                    );
-                color: #e2e8f0;
-            }
-            .tech-card {
-                background: rgba(21, 26, 35, 0.85);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                box-shadow:
-                    0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-            }
-            .tech-input {
-                background: rgba(11, 15, 21, 0.6);
-                border: 1px solid #2d3748;
-                transition: all 0.2s ease;
-            }
-            .tech-input:focus {
-                background: rgba(11, 15, 21, 0.9);
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
-            }
-            .bg-grid {
-                background-size: 40px 40px;
-                background-image:
-                    linear-gradient(
-                        to right,
-                        rgba(255, 255, 255, 0.02) 1px,
-                        transparent 1px
-                    ),
-                    linear-gradient(
-                        to bottom,
-                        rgba(255, 255, 255, 0.02) 1px,
-                        transparent 1px
-                    );
-                mask-image: radial-gradient(
-                    circle at 50% 50%,
-                    black 40%,
-                    transparent 80%
-                );
-            }
-        </style>
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+        ></script>
     </head>
-    <body
-        class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-    >
-        <div class="fixed inset-0 bg-grid pointer-events-none"></div>
+    <body class="bg-gray-900 text-gray-100 min-h-screen p-8">
+        <div class="max-w-lg mx-auto" x-data="htpkBuilder()">
+            <h1 class="text-2xl font-bold mb-6">HTPK Builder</h1>
 
-        <div class="max-w-[500px] w-full relative z-10 animate-slide-up">
-            <div class="flex items-center justify-between mb-6 px-1">
+            <form @submit.prevent="submitBuild" class="space-y-4">
+                <!-- App ID -->
                 <div>
-                    <h1
-                        class="text-2xl font-semibold tracking-tight text-white"
+                    <label class="block text-sm font-medium mb-1">App ID</label>
+                    <input
+                        type="text"
+                        x-model="appId"
+                        required
+                        pattern="[a-z][a-z0-9_]*"
+                        class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                        placeholder="myapp"
+                    />
+                </div>
+
+                <!-- App Name -->
+                <div>
+                    <label class="block text-sm font-medium mb-1"
+                        >App Name</label
                     >
-                        <span class="text-tech-accent font-mono">HTPK</span> //
-                        Builder
-                    </h1>
-                    <p class="text-tech-text-muted text-sm mt-1">
-                        Deploy web assets to Android
+                    <input
+                        type="text"
+                        x-model="appName"
+                        required
+                        class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                        placeholder="My App"
+                    />
+                </div>
+
+                <!-- Source Type -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Source</label>
+                    <div class="flex gap-2">
+                        <button
+                            type="button"
+                            @click="sourceType = 'file'"
+                            :class="sourceType === 'file' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'"
+                            class="flex-1 py-2 rounded text-sm font-medium transition"
+                        >
+                            ZIP File
+                        </button>
+                        <button
+                            type="button"
+                            @click="sourceType = 'git'"
+                            :class="sourceType === 'git' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'"
+                            class="flex-1 py-2 rounded text-sm font-medium transition"
+                        >
+                            Git
+                        </button>
+                        <button
+                            type="button"
+                            @click="sourceType = 'url'"
+                            :class="sourceType === 'url' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'"
+                            class="flex-1 py-2 rounded text-sm font-medium transition"
+                        >
+                            URL
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File Input -->
+                <div x-show="sourceType === 'file'">
+                    <label class="block text-sm font-medium mb-1"
+                        >ZIP Archive</label
+                    >
+                    <input
+                        type="file"
+                        accept=".zip"
+                        @change="zipFile = $event.target.files[0]"
+                        class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm file:mr-3 file:bg-gray-700 file:border-0 file:rounded file:px-3 file:py-1 file:text-gray-100"
+                    />
+                    <p class="text-xs text-gray-500 mt-1">
+                        Must contain index.html
                     </p>
                 </div>
-                <div
-                    class="h-10 w-10 rounded-lg bg-tech-surface border border-tech-border flex items-center justify-center text-tech-text-muted shadow-inner-light"
+
+                <!-- Git Input -->
+                <div x-show="sourceType === 'git'" class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium mb-1"
+                            >Repository URL</label
+                        >
+                        <input
+                            type="url"
+                            x-model="gitUrl"
+                            class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                            placeholder="https://github.com/user/repo"
+                        />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1"
+                                >Branch</label
+                            >
+                            <input
+                                type="text"
+                                x-model="gitBranch"
+                                class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1"
+                                >Entry Point</label
+                            >
+                            <input
+                                type="text"
+                                x-model="gitEntry"
+                                class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- URL Input -->
+                <div x-show="sourceType === 'url'">
+                    <label class="block text-sm font-medium mb-1"
+                        >Website URL</label
+                    >
+                    <input
+                        type="url"
+                        x-model="mainUrl"
+                        class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                        placeholder="https://example.com"
+                    />
+                </div>
+
+                <!-- Icon -->
+                <div>
+                    <label class="block text-sm font-medium mb-1"
+                        >App Icon (PNG)</label
+                    >
+                    <input
+                        type="file"
+                        accept="image/png"
+                        @change="iconFile = $event.target.files[0]"
+                        required
+                        class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm file:mr-3 file:bg-gray-700 file:border-0 file:rounded file:px-3 file:py-1 file:text-gray-100"
+                    />
+                </div>
+
+                <!-- Submit -->
+                <button
+                    type="submit"
+                    :disabled="building"
+                    class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed py-3 rounded font-medium transition"
                 >
-                    <i class="fa-brands fa-android text-lg"></i>
+                    <span x-show="!building">Build APK</span>
+                    <span x-show="building">Building...</span>
+                </button>
+            </form>
+
+            <!-- Progress -->
+            <div x-show="building" class="mt-6">
+                <div class="flex justify-between text-sm mb-1">
+                    <span x-text="progressStage"></span>
+                    <span x-text="progress + '%'"></span>
                 </div>
-            </div>
-
-            <div class="tech-card rounded-xl p-6 md:p-8">
-                <form id="buildForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="space-y-1.5">
-                            <label
-                                class="block text-xs font-medium text-tech-text-muted uppercase tracking-wider"
-                                >App ID</label
-                            >
-                            <input
-                                type="text"
-                                name="app_id"
-                                required
-                                pattern="[a-z][a-z0-9_]*"
-                                value="myapp"
-                                class="tech-input w-full px-4 py-2.5 rounded-lg text-sm text-white font-mono placeholder-gray-600 outline-none"
-                                placeholder="com.example.app"
-                            />
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <label
-                                class="block text-xs font-medium text-tech-text-muted uppercase tracking-wider"
-                                >App Name</label
-                            >
-                            <input
-                                type="text"
-                                name="name"
-                                required
-                                value="My App"
-                                class="tech-input w-full px-4 py-2.5 rounded-lg text-sm text-white placeholder-gray-600 outline-none"
-                                placeholder="My Application"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="space-y-3 pt-2">
-                        <div class="flex justify-between items-end">
-                            <label
-                                class="block text-xs font-medium text-tech-text-muted uppercase tracking-wider"
-                                >Source Material</label
-                            >
-                        </div>
-
-                        <div
-                            class="bg-tech-surface-lighter/50 p-1 rounded-lg flex border border-tech-border/50"
-                        >
-                            <button
-                                type="button"
-                                id="btn-file"
-                                onclick="setSource('file')"
-                                class="flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 shadow-sm bg-tech-accent text-white"
-                            >
-                                <i class="fa-solid fa-file-zipper"></i>
-                                <span>Archive</span>
-                            </button>
-                            <button
-                                type="button"
-                                id="btn-url"
-                                onclick="setSource('url')"
-                                class="flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 text-tech-text-muted hover:text-white hover:bg-white/5"
-                            >
-                                <i class="fa-solid fa-globe"></i>
-                                <span>URL</span>
-                            </button>
-                        </div>
-
-                        <div id="group-file" class="mt-4">
-                            <div class="relative group">
-                                <input
-                                    id="input-file"
-                                    name="zip_file"
-                                    type="file"
-                                    accept=".zip"
-                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                />
-                                <div
-                                    class="tech-input border-dashed border-2 border-tech-border rounded-lg p-6 text-center transition-colors group-hover:border-tech-text-muted group-hover:bg-tech-surface-lighter/30"
-                                >
-                                    <div
-                                        id="upload-placeholder"
-                                        class="transition-opacity"
-                                    >
-                                        <div
-                                            class="w-12 h-12 rounded-full bg-tech-surface border border-tech-border flex items-center justify-center mx-auto mb-3 text-tech-accent shadow-glow"
-                                        >
-                                            <i
-                                                class="fa-solid fa-cloud-arrow-up"
-                                            ></i>
-                                        </div>
-                                        <p
-                                            class="text-sm font-medium text-tech-text"
-                                        >
-                                            Drop ZIP file here
-                                        </p>
-                                        <p
-                                            class="text-xs text-tech-text-muted mt-1"
-                                        >
-                                            Must contain index.html
-                                        </p>
-                                    </div>
-                                    <div
-                                        id="file-info"
-                                        class="hidden flex items-center justify-center gap-3"
-                                    >
-                                        <i
-                                            class="fa-solid fa-file-zipper text-tech-accent text-xl"
-                                        ></i>
-                                        <span
-                                            id="file-name-display"
-                                            class="font-mono text-sm text-white truncate max-w-[200px]"
-                                        ></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="group-url" class="hidden mt-4">
-                            <div class="relative">
-                                <div
-                                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                                >
-                                    <span
-                                        class="text-tech-text-muted font-mono text-xs"
-                                        >https://</span
-                                    >
-                                </div>
-                                <input
-                                    type="url"
-                                    id="input-url"
-                                    name="main_url"
-                                    placeholder="google.com"
-                                    value="https://google.com"
-                                    class="tech-input w-full pl-16 pr-4 py-2.5 rounded-lg text-sm text-white font-mono placeholder-gray-600 outline-none"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-2">
-                        <label
-                            class="block text-xs font-medium text-tech-text-muted uppercase tracking-wider mb-2"
-                            >App Icon</label
-                        >
-                        <div class="flex items-center gap-4">
-                            <div
-                                id="icon-preview"
-                                class="h-14 w-14 rounded-xl bg-tech-surface border border-tech-border flex items-center justify-center overflow-hidden shrink-0"
-                            >
-                                <i
-                                    class="fa-regular fa-image text-tech-text-muted"
-                                ></i>
-                            </div>
-                            <div class="flex-1">
-                                <label
-                                    class="flex items-center justify-center w-full px-4 py-2 bg-tech-surface border border-tech-border rounded-lg cursor-pointer hover:bg-tech-surface-lighter hover:border-tech-text-muted transition-all group"
-                                >
-                                    <span
-                                        class="text-xs font-medium text-tech-text-muted group-hover:text-white transition-colors"
-                                        >Select PNG...</span
-                                    >
-                                    <input
-                                        type="file"
-                                        name="icon"
-                                        accept="image/png"
-                                        required
-                                        onchange="previewIcon(this)"
-                                        class="hidden"
-                                    />
-                                </label>
-                                <p
-                                    class="text-[10px] text-tech-text-muted mt-1.5 text-center md:text-left"
-                                >
-                                    *Recommended 512px
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-tech-border/50 my-2"></div>
-
-                    <button
-                        type="submit"
-                        id="submitBtn"
-                        class="w-full bg-tech-accent hover:bg-tech-accent-hover text-white font-medium py-3 rounded-lg shadow-lg shadow-blue-900/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
-                    >
-                        <span>Initiate Build</span>
-                        <i
-                            class="fa-solid fa-arrow-right text-xs opacity-70"
-                        ></i>
-                    </button>
-                </form>
-
-                <div
-                    id="status"
-                    class="mt-4 hidden p-3 rounded-lg text-sm font-mono border"
-                ></div>
-
-                <div id="progressContainer" class="mt-6 hidden">
+                <div class="w-full bg-gray-700 rounded-full h-2">
                     <div
-                        class="flex justify-between items-end mb-2 text-xs font-mono uppercase tracking-wider"
-                    >
-                        <span
-                            id="progressStage"
-                            class="text-tech-accent animate-pulse"
-                            >Initializing</span
-                        >
-                        <span id="progressPercent" class="text-white">0%</span>
-                    </div>
-                    <div
-                        class="w-full bg-tech-surface border border-tech-border rounded-full h-1.5 overflow-hidden"
-                    >
-                        <div
-                            id="progressBar"
-                            class="bg-tech-accent h-1.5 rounded-full transition-all duration-300 shadow-glow"
-                            style="width: 0%"
-                        ></div>
-                    </div>
-                    <p
-                        id="progressMessage"
-                        class="text-xs text-tech-text-muted mt-2 font-mono truncate"
-                    >
-                        Waiting for server response...
-                    </p>
+                        class="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        :style="'width: ' + progress + '%'"
+                    ></div>
                 </div>
-            </div>
-
-            <div class="text-center mt-6">
                 <p
-                    class="text-[10px] text-tech-text-muted font-mono opacity-50"
-                >
-                    SYSTEM READY // V2.4
-                </p>
+                    class="text-xs text-gray-500 mt-2"
+                    x-text="progressMessage"
+                ></p>
+            </div>
+
+            <!-- Status -->
+            <div
+                x-show="status"
+                class="mt-4 p-3 rounded text-sm"
+                :class="statusType === 'error' ? 'bg-red-900/50 border border-red-700 text-red-300' : 'bg-green-900/50 border border-green-700 text-green-300'"
+            >
+                <span x-text="status"></span>
             </div>
         </div>
 
         <script>
-            // Elements
-            const btnUrl = document.getElementById("btn-url");
-            const btnFile = document.getElementById("btn-file");
-            const groupUrl = document.getElementById("group-url");
-            const groupFile = document.getElementById("group-file");
-            const inputUrl = document.getElementById("input-url");
-            const inputFile = document.getElementById("input-file");
-            const fileNameDisplay =
-                document.getElementById("file-name-display");
-            const uploadPlaceholder =
-                document.getElementById("upload-placeholder");
-            const fileInfo = document.getElementById("file-info");
+            const API_URL = "http://localhost:9741";
 
-            const form = document.getElementById("buildForm");
-            const btn = document.getElementById("submitBtn");
-            const status = document.getElementById("status");
-            const progressContainer =
-                document.getElementById("progressContainer");
-            const progressBar = document.getElementById("progressBar");
-            const progressStage = document.getElementById("progressStage");
-            const progressPercent = document.getElementById("progressPercent");
-            const progressMessage = document.getElementById("progressMessage");
+            function htpkBuilder() {
+                return {
+                    appId: "myapp",
+                    appName: "My App",
+                    sourceType: "file",
+                    zipFile: null,
+                    gitUrl: "",
+                    gitBranch: "main",
+                    gitEntry: "index.html",
+                    mainUrl: "",
+                    iconFile: null,
+                    building: false,
+                    progress: 0,
+                    progressStage: "",
+                    progressMessage: "",
+                    status: "",
+                    statusType: "",
+                    eventSource: null,
 
-            let currentMode = "file";
-            let eventSource = null;
-            let buildFinished = false;
+                    async submitBuild() {
+                        this.building = true;
+                        this.status = "";
+                        this.progress = 0;
+                        this.progressStage = "Starting";
+                        this.progressMessage = "Submitting build request...";
 
-            function setSource(mode) {
-                currentMode = mode;
-                const activeClass = "bg-tech-accent text-white shadow-sm";
-                const inactiveClass =
-                    "text-tech-text-muted hover:text-white hover:bg-white/5";
+                        const formData = new FormData();
+                        formData.append("app_id", this.appId);
+                        formData.append("name", this.appName);
+                        formData.append("icon", this.iconFile);
 
-                if (mode === "url") {
-                    // UI
-                    btnUrl.className = `flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${activeClass}`;
-                    btnFile.className = `flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${inactiveClass}`;
+                        if (this.sourceType === "file" && this.zipFile) {
+                            formData.append("zip_file", this.zipFile);
+                        } else if (this.sourceType === "git") {
+                            formData.append("git_url", this.gitUrl);
+                            formData.append("git_branch", this.gitBranch);
+                            formData.append("git_entry", this.gitEntry);
+                        } else if (this.sourceType === "url") {
+                            formData.append("main_url", this.mainUrl);
+                        }
 
-                    groupUrl.classList.remove("hidden");
-                    groupUrl.classList.add("animate-fade-in");
-                    groupFile.classList.add("hidden");
+                        try {
+                            const response = await fetch(
+                                `${API_URL}/build-app`,
+                                {
+                                    method: "POST",
+                                    body: formData,
+                                },
+                            );
 
-                    // LOGIC: Enable URL input, Disable File input
-                    inputUrl.disabled = false;
-                    inputUrl.required = true;
+                            if (!response.ok)
+                                throw new Error(await response.text());
+                            const result = await response.json();
+                            this.connectProgress(result.build_id);
+                        } catch (e) {
+                            this.showError(e.message);
+                        }
+                    },
 
-                    inputFile.disabled = true; // Key Fix
-                    inputFile.required = false;
+                    connectProgress(buildId) {
+                        this.eventSource = new EventSource(
+                            `${API_URL}/build-progress/${buildId}`,
+                        );
 
-                    inputFile.value = "";
-                    resetFileUI();
-                } else {
-                    // UI
-                    btnFile.className = `flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${activeClass}`;
-                    btnUrl.className = `flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${inactiveClass}`;
+                        this.eventSource.onmessage = (e) => {
+                            const data = JSON.parse(e.data);
+                            this.progress = data.progress;
+                            this.progressStage =
+                                data.message.split("...")[0] || data.status;
+                            this.progressMessage = data.message;
+                        };
 
-                    groupFile.classList.remove("hidden");
-                    groupUrl.classList.add("hidden");
+                        this.eventSource.addEventListener(
+                            "complete",
+                            async (e) => {
+                                this.eventSource.close();
+                                const data = JSON.parse(e.data);
+                                await this.downloadApk(data.build_id);
+                            },
+                        );
 
-                    // LOGIC: Enable File input, Disable URL input
-                    inputFile.disabled = false;
-                    inputFile.required = true;
+                        this.eventSource.addEventListener("error", (e) => {
+                            this.eventSource.close();
+                            if (e.data) {
+                                const data = JSON.parse(e.data);
+                                this.showError(data.error);
+                            }
+                        });
+                    },
 
-                    inputUrl.disabled = true; // Key Fix
-                    inputUrl.required = false;
-                }
-            }
+                    async downloadApk(buildId) {
+                        try {
+                            const response = await fetch(
+                                `${API_URL}/download-apk/${buildId}`,
+                            );
+                            if (!response.ok)
+                                throw new Error("Download failed");
 
-            function resetFileUI() {
-                uploadPlaceholder.classList.remove("hidden");
-                fileInfo.classList.add("hidden");
-            }
+                            const blob = await response.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = `${this.appId}.apk`;
+                            a.click();
+                            URL.revokeObjectURL(url);
 
-            inputFile.addEventListener("change", function (e) {
-                if (this.files && this.files.length > 0) {
-                    fileNameDisplay.textContent = this.files[0].name;
-                    uploadPlaceholder.classList.add("hidden");
-                    fileInfo.classList.remove("hidden");
-                } else {
-                    resetFileUI();
-                }
-            });
+                            this.status = "APK built successfully!";
+                            this.statusType = "success";
+                        } catch (e) {
+                            this.showError(e.message);
+                        }
+                        this.building = false;
+                    },
 
-            function previewIcon(input) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const previewContainer =
-                            document.getElementById("icon-preview");
-                        previewContainer.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                        previewContainer.classList.add("border-tech-accent");
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-
-            function updateProgress(stage, progress, message) {
-                progressStage.textContent = stage;
-                progressPercent.textContent = `${progress}%`;
-                progressBar.style.width = `${progress}%`;
-                progressMessage.textContent = message;
-            }
-
-            function connectToProgressStream(buildId) {
-                buildFinished = false;
-                eventSource = new EventSource(
-                    `http://localhost:8000/build-progress/${buildId}`,
-                );
-
-                eventSource.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    updateProgress(data.stage, data.progress, data.message);
+                    showError(msg) {
+                        this.status = "Error: " + msg;
+                        this.statusType = "error";
+                        this.building = false;
+                    },
                 };
-
-                eventSource.addEventListener("complete", (event) => {
-                    const data = JSON.parse(event.data);
-                    buildFinished = true;
-                    eventSource.close();
-                    downloadAPK(data.build_id);
-                });
-
-                eventSource.addEventListener("error", (event) => {
-                    if (buildFinished) return;
-
-                    if (event.data) {
-                        const data = JSON.parse(event.data);
-                        handleError(data.error);
-                    }
-                    if (event.data) eventSource.close();
-                });
             }
-
-            async function downloadAPK(buildId) {
-                try {
-                    updateProgress("Finalizing", 100, "Downloading package...");
-                    const response = await fetch(
-                        `http://localhost:8000/download-apk/${buildId}`,
-                    );
-                    if (!response.ok) throw new Error("Failed to download APK");
-
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-
-                    const contentDisposition = response.headers.get(
-                        "content-disposition",
-                    );
-                    let filename = "app_release.apk";
-                    if (contentDisposition) {
-                        const match =
-                            contentDisposition.match(/filename="?(.+)"?/);
-                        if (match) filename = match[1];
-                    }
-
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-
-                    showStatus("APK generated successfully.", "success");
-                    resetUI();
-                } catch (error) {
-                    handleError(error.message);
-                }
-            }
-
-            function showStatus(msg, type) {
-                status.textContent = msg;
-                status.classList.remove("hidden");
-                status.className =
-                    type === "error"
-                        ? "mt-4 p-3 rounded-lg text-sm font-mono border bg-red-900/20 border-red-800 text-red-300"
-                        : "mt-4 p-3 rounded-lg text-sm font-mono border bg-green-900/20 border-green-800 text-green-300";
-            }
-
-            function handleError(msg) {
-                showStatus(`Error: ${msg}`, "error");
-                progressContainer.classList.add("hidden");
-                resetUI();
-            }
-
-            function resetUI() {
-                btn.disabled = false;
-                btn.innerHTML = `<span>Initiate Build</span> <i class="fa-solid fa-arrow-right text-xs opacity-70"></i>`;
-            }
-
-            form.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...`;
-                status.classList.add("hidden");
-                progressContainer.classList.remove("hidden");
-                updateProgress("Starting", 0, "Submitting build request...");
-
-                try {
-                    const formData = new FormData(form);
-
-                    // Since disabled inputs aren't sent automatically,
-                    // we just need to make sure we don't send empty ones if they exist.
-                    if (currentMode === "file") formData.delete("main_url");
-                    else formData.delete("zip_file");
-
-                    const response = await fetch(
-                        "http://localhost:8000/build-app",
-                        {
-                            method: "POST",
-                            body: formData,
-                        },
-                    );
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(errorText || "Build failed");
-                    }
-
-                    const result = await response.json();
-                    connectToProgressStream(result.build_id);
-                } catch (error) {
-                    handleError(error.message);
-                }
-            });
-
-            // Initialize UI state correctly on load
-            setSource("file");
         </script>
     </body>
 </html>
