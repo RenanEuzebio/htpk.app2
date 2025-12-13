@@ -165,21 +165,37 @@
             </form>
 
             <!-- Progress -->
-            <div x-show="building" class="mt-6">
-                <div class="flex justify-between text-sm mb-1">
-                    <span x-text="progressStage"></span>
-                    <span x-text="progress + '%'"></span>
+            <div x-show="building" class="mt-6" x-transition>
+                <div class="flex justify-between text-sm mb-2">
+                    <span
+                        class="text-blue-400 font-medium truncate max-w-[70%]"
+                        x-text="progressMessage"
+                    ></span>
+                    <span
+                        class="text-gray-400 font-mono"
+                        x-text="progress + '%'"
+                    ></span>
                 </div>
-                <div class="w-full bg-gray-700 rounded-full h-2">
+                <div
+                    class="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden"
+                >
                     <div
-                        class="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        class="bg-gradient-to-r from-blue-600 to-blue-400 h-2.5 rounded-full transition-all duration-500 ease-out"
                         :style="'width: ' + progress + '%'"
                     ></div>
                 </div>
                 <p
                     class="text-xs text-gray-500 mt-2"
-                    x-text="progressMessage"
-                ></p>
+                    x-show="progress >= 50 && progress < 95"
+                >
+                    Gradle build in progress...
+                </p>
+                <p class="text-xs text-gray-500 mt-2" x-show="progress < 50">
+                    Preparing build environment...
+                </p>
+                <p class="text-xs text-green-500 mt-2" x-show="progress >= 95">
+                    Almost done!
+                </p>
             </div>
 
             <!-- Status -->
@@ -262,9 +278,8 @@
                         this.eventSource.onmessage = (e) => {
                             const data = JSON.parse(e.data);
                             this.progress = data.progress;
-                            this.progressStage =
-                                data.message.split("...")[0] || data.status;
-                            this.progressMessage = data.message;
+                            this.progressMessage =
+                                data.message || data.status || "Processing...";
                         };
 
                         this.eventSource.addEventListener(

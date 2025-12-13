@@ -593,6 +593,31 @@ public class MainActivity extends AppCompatActivity {
 build_states = {}
 build_states_lock = Lock()
 
+# Gradle task patterns and their progress weights
+# These tasks appear in order during an Android build
+GRADLE_TASKS = [
+    (r"preBuild", 5),
+    (r"preReleaseBuild", 8),
+    (r"compileReleaseAidl", 10),
+    (r"compileReleaseRenderscript", 12),
+    (r"generateReleaseBuildConfig", 15),
+    (r"generateReleaseResValues", 18),
+    (r"generateReleaseResources", 20),
+    (r"mergeReleaseResources", 25),
+    (r"processReleaseResources", 30),
+    (r"compileReleaseJavaWithJavac", 45),
+    (r"compileReleaseSources", 50),
+    (r"mergeReleaseJavaResource", 55),
+    (r"dexBuilderRelease", 60),
+    (r"mergeDexRelease", 70),
+    (r"mergeReleaseJniLibFolders", 72),
+    (r"mergeReleaseNativeLibs", 75),
+    (r"packageRelease", 85),
+    (r"assembleRelease", 90),
+    (r"signReleaseBundle", 92),
+    (r"BUILD SUCCESSFUL", 95),
+]
+
 
 def run_command(command: list[str], cwd: Path, output_target_dir: Path = None) -> None:
     env = os.environ.copy()
@@ -609,6 +634,93 @@ def run_command(command: list[str], cwd: Path, output_target_dir: Path = None) -
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
+
+
+def run_gradle_with_progress(
+    command: list[str],
+    cwd: Path,
+    build_id: str,
+    base_progress: int = 60,
+    output_target_dir: Path = None,
+) -> None:
+    """Run Gradle command with real-time progress tracking."""
+    env = os.environ.copy()
+    env["ANDROID_PROJECT_ROOT"] = str(ANDROID_DIR)
+    env["CACHE_DIR"] = str(CACHE_DIR)
+    if output_target_dir:
+        env["OUTPUT_DIR"] = str(output_target_dir)
+
+    process = subprocess.Popen(
+        command,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+
+    current_task = "Starting Gradle..."
+    last_progress = base_progress
+    output_lines = []
+
+    for line in process.stdout:
+        output_lines.append(line)
+        line_stripped = line.strip()
+
+        # Check for task patterns
+        for pattern, progress_value in GRADLE_TASKS:
+            if pattern in line_stripped:
+                # Scale progress: base_progress to 95
+                scaled_progress = base_progress + int(
+                    (progress_value / 100) * (95 - base_progress)
+                )
+                if scaled_progress > last_progress:
+                    last_progress = scaled_progress
+                    # Extract a cleaner task name
+                    if ">" in line_stripped:
+                        task_part = line_stripped.split(">")[-1].strip()
+                        current_task = (
+                            task_part[:50] if len(task_part) > 50 else task_part
+                        )
+                    else:
+                        current_task = pattern
+
+                    with build_states_lock:
+                        build_states[build_id].update(
+                            {
+                                "progress": last_progress,
+                                "message": f"Building: {current_task}",
+                                "status": "in_progress",
+                            }
+                        )
+                break
+
+        # Also check for downloading dependencies (first build)
+        if "Downloading" in line_stripped or "Download" in line_stripped:
+            with build_states_lock:
+                build_states[build_id].update(
+                    {
+                        "message": "Downloading dependencies...",
+                        "status": "in_progress",
+                    }
+                )
+        elif "Compiling" in line_stripped:
+            with build_states_lock:
+                build_states[build_id].update(
+                    {
+                        "message": "Compiling source code...",
+                        "status": "in_progress",
+                    }
+                )
+
+    process.wait()
+
+    if process.returncode != 0:
+        output_text = "".join(output_lines)
+        raise subprocess.CalledProcessError(
+            process.returncode, command, output=output_text.encode()
+        )
 
 
 def write_conf(app_id: str, name: str, target_path: Path) -> None:
@@ -733,7 +845,7 @@ def execute_build_async(build_id: str, data: dict) -> None:
             final_url = data["main_url"]
             git_info = None
 
-        update(15, "Cleaning previous builds...")
+        update(20, "Cleaning previous builds...")
         # CRITICAL FIX: Clean build artifacts to prevent crashes from stale cache
         # We ignore errors here in case clean fails on a fresh run
         try:
@@ -741,7 +853,7 @@ def execute_build_async(build_id: str, data: dict) -> None:
         except:
             pass
 
-        update(25, "Configuring project...")
+        update(30, "Configuring project...")
         conf_path = app_output_dir / CONF_FILENAME
         write_conf(app_id, name, conf_path)
 
@@ -751,20 +863,24 @@ def execute_build_async(build_id: str, data: dict) -> None:
         )
 
         # Overwrite source code with correct templates (AssetLoader + Mixed Content)
-        update(40, "Injecting source code...")
+        update(45, "Injecting source code...")
         overwrite_android_files(app_id, final_url, name, git_info)
 
-        update(60, "Building APK (this takes a minute)...")
-        run_command(
+        update(50, "Building APK...")
+        run_gradle_with_progress(
             ["bash", str(MAKE_SH_PATH), "apk"],
             cwd=BASE_DIR,
+            build_id=build_id,
+            base_progress=50,
             output_target_dir=app_output_dir,
         )
 
+        update(96, "Verifying APK...")
         final_apk = app_output_dir / f"{app_id}.apk"
         if not final_apk.exists():
             raise FileNotFoundError("APK build failed")
 
+        update(98, "Finalizing...")
         update(
             100,
             "Done!",
